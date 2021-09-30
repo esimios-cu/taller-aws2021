@@ -14,8 +14,7 @@
 </template>
 
 <script>
-import auth from '@/components/auth'
-
+import { mapActions } from 'vuex'
 export default {
 	data: () => ({
 		email: '',
@@ -23,10 +22,11 @@ export default {
 		passwordRepeat: ''
 	}),
 	methods: {
+		...mapActions(['register']),
 		async register() {
 			try {
-				await auth.register(this.email, this.password)
-				this.$router.push('/')
+				// await auth.register(this.email, this.password)
+				// this.$router.push('/')
 			} catch (error) {
 				console.log(error)
 			}

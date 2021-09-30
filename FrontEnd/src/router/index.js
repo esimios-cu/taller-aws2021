@@ -49,8 +49,10 @@ router.beforeEach((to, from, next) => {
 	} else {
 		const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
 		const isLogin = store.state.isLogin
-		if (!isLogin && requiresAuth !== false) {
+		if (!isLogin && requiresAuth) {
 			next({ name: 'Login' })
+		} else if (isLogin && !requiresAuth) {
+			next({ name: 'Home' })
 		} else {
 			next()
 		}
