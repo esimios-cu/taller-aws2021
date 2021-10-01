@@ -4,6 +4,10 @@ const ENDPOINT_PATH = 'https://kcbead0v4e.execute-api.us-east-2.amazonaws.com/de
 const setAuthorization = token => {
 	axios.defaults.headers.common['authorization'] = 'Bearer ' + token
 }
+if (localStorage.getItem('userData')) {
+	const token = JSON.parse(localStorage.getItem('userData')).accessToken
+	setAuthorization(token)
+}
 export default {
 	async login(store, context) {
 		try {
@@ -13,8 +17,8 @@ export default {
 			store.commit('setUserData', result.data)
 			return result
 		} catch (err) {
-			console.error(err)
-			return 'Ocurrió un error al hacer login'
+			const response = err.response.data
+			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
 		}
 	},
 	async register(store, context) {
@@ -22,18 +26,18 @@ export default {
 			const result = await axios.post(ENDPOINT_PATH + 'signup', context)
 			return result
 		} catch (err) {
-			console.error(err)
-			return { code: -1, message: 'Ocurrió un error al registrar al usuario' }
+			const response = err.response.data
+			throw { code: -1, message: response.message || 'Ocurrió un error al registrar al usuario' }
 		}
 	},
 	async logout(store, context) {
 		try {
-			const result = await axios.post(ENDPOINT_PATH + 'signout', context)
+			const result = null // await axios.post(ENDPOINT_PATH + 'signout', context)
 			store.commit('setUserData', null)
 			return result
 		} catch (err) {
-			console.error(err)
-			return { code: -1, message: 'Ocurrió un error al hacer logout' }
+			const response = err.response.data
+			throw { code: -1, message: response.message || 'Ocurrió un error al hacer logout' }
 		}
 	}
 }
