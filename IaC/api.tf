@@ -29,6 +29,19 @@ resource "aws_apigatewayv2_route" "sign_up" {
     target              = "integrations/${aws_apigatewayv2_integration.api_integration.id}"
 }
 
+resource "aws_apigatewayv2_integration" "sign_in" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    integration_method  = "POST"
+    integration_type    = "AWS_PROXY"
+    integration_uri     = aws_lambda_function.sign_in.invoke_arn
+}
+
+resource "aws_apigatewayv2_route" "sign_in" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    route_key           = "POST /signin"
+    target              = "integrations/${aws_apigatewayv2_integration.sign_in.id}"
+}
+
 resource "aws_apigatewayv2_stage" "lambda" {
     api_id = aws_apigatewayv2_api.api_gateway.id
     name        = "dev_stage_taller_seguridad"
@@ -57,6 +70,15 @@ resource "aws_lambda_permission" "lambda_permission" {
     statement_id    = "AllowExecutionFromAPIGateway"
     action          = "lambda:InvokeFunction"
     function_name   = aws_lambda_function.sign_up.function_name
+    principal       = "apigateway.amazonaws.com"
+
+    source_arn      = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "sign_in" {
+    statement_id    = "AllowExecutionFromAPIGateway"
+    action          = "lambda:InvokeFunction"
+    function_name   = aws_lambda_function.sign_in.function_name
     principal       = "apigateway.amazonaws.com"
 
     source_arn      = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"
