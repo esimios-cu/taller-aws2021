@@ -34,9 +34,18 @@ module.exports.handler = async (event, context) => {
 			userSub: signUpResponse.UserSub
 		})
 	} catch (_err) {
-		console.log('ERROR on Handler', _err)
-		let err = utilitiesResponse.error(statusCode, _err)
-		console.log('ERROR FORMAT->', err)
-		return err
+		let err = _err
+		console.log('ERROR on Handler', err)
+		if (err.name && err.name == 'UsernameExistsException') {
+			statusCode = 400
+			err.message = 'El correo electrónico ya ha sido registrado previamente'
+		}
+		if (err.name && err.name == 'InvalidPasswordException') {
+			statusCode = 400
+			err.message = 'La contraseña no cumple con los requerimientos de seguridad'
+		}
+		let errResponse = utilitiesResponse.error(statusCode, err)
+		console.log('ERROR RESPONSE->', errResponse)
+		return errResponse
 	}
 }
