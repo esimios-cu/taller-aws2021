@@ -6,32 +6,34 @@
 					<GmapMarker :key="index" v-for="(m, index) in markers" :position="m.position" :clickable="false" :draggable="true" @click="center = m.position" />
 				</GmapMap>
 			</div>
-			<div class="with30 m10">
-				<div class="text-right">Bienvenido {{ userData.name }}</div>
-				<img class="logo" src="@/assets/logoEsime.png" />
-				<h3>Taller "Prácticas de seguridad en el desarrollo de microservicios en AWS"</h3>
+			<div class="with30">
+				<div class="m10">
+					<div class="text-right">Bienvenido {{ userData.name }}<br /><a href="#" @click="doSignOut()">Cerrar sesión</a></div>
+					<img class="logo" src="@/assets/logoEsime.png" />
+					<h3>Taller "Prácticas de seguridad en el desarrollo de microservicios en AWS"</h3>
 
-				<div class="separation">
-					<button v-if="!makingPolygon" @click="makePolygon">Hacer nueva zona</button>
-					<div class="warning" v-if="pointsOfPolygon.length == 0 && makingPolygon && polygon && polygon.getPaths().length === 0">
-						Debe hacer varios clicks sobre el mapa para delimitar la zona a crear. Al terminar el poligono se iluminará, agregue un nombre y seleccione el botón de "Agregar Zona" para almacenarlo.
+					<div class="separation">
+						<button v-if="!makingPolygon" @click="makePolygon">Hacer nueva zona</button>
+						<div class="warning" v-if="pointsOfPolygon.length == 0 && makingPolygon && polygon && polygon.getPaths().length === 0">
+							Debe hacer varios clicks sobre el mapa para delimitar la zona a crear. Al terminar el poligono se iluminará, agregue un nombre y seleccione el botón de "Agregar Zona" para almacenarlo.
+						</div>
+						<div v-if="makingPolygon">
+							<form @submit.prevent="onAddZone">
+								<input v-model="zoneName" required="true" placeholder="Nombre de la zona" />
+								<button :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
+								<button type="reset" @click="cancelAddZone">Cancelar</button>
+							</form>
+						</div>
 					</div>
-					<div v-if="makingPolygon">
-						<form @submit.prevent="addZone">
-							<input v-model="zoneName" required="true" :disabled="polygon.getPaths().length === 0" placeholder="Nombre de la zona" />
-							<button :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
-						</form>
+					<div class="separation">
+						<select :disabled="makingPolygon" class="text-center" v-model="selectedZone" @change="changeSelectZone">
+							<option value="">Seleccione una zona</option>
+							<option v-for="zone in zones" :value="zone.name" :key="zone.idZone">
+								{{ zone.name }}
+							</option>
+						</select>
 					</div>
 				</div>
-				<div class="separation">
-					<select :disabled="makingPolygon" class="text-center" v-model="selectedZone" @change="changeSelectZone">
-						<option value="null">Seleccione una zona</option>
-						<option v-for="zone in zones" :value="zone.name" :key="zone.idZone">
-							{{ zone.name }}
-						</option>
-					</select>
-				</div>
-				<div class="separation">Cerrar sesión</div>
 			</div>
 		</div>
 	</div>
@@ -50,7 +52,7 @@ export default {
 	},
 	data() {
 		return {
-			selectedZone: null,
+			selectedZone: '',
 			zones: [{ name: 'Zona 1', polygon: [] }],
 			center: { lat: 19.32874, lng: -99.112096 },
 			markers: [],
@@ -65,6 +67,7 @@ export default {
 	},
 	components: {},
 	async mounted() {
+		this.loadZones()
 		this.$refs.mapRef.$mapPromise.then(map => {
 			this.map = map
 			window.map = map
@@ -91,12 +94,25 @@ export default {
 		})
 	},
 	methods: {
+		...mapActions(['logout', 'getAllZones', 'addZone']),
 		cleanPolygon() {
 			this.pointsOfPolygon = []
 			this.polyline.setPath(this.pointsOfPolygon)
 			this.polygon.setPaths(this.pointsOfPolygon)
 		},
-		addZone() {
+		cancelAddZone() {
+			this.cleanPolygon()
+			this.makingPolygon = false
+		},
+		async loadZones() {
+			try {
+				const resultZones = await this.getAllZones()
+				this.zones = resultZones.data
+			} catch (err) {
+				console.error(err)
+			}
+		},
+		onAddZone() {
 			const dataset = {
 				name: this.zoneName,
 				polygon: this.polygon
@@ -106,7 +122,11 @@ export default {
 						return { lat: item.lat(), lng: item.lng() }
 					})
 			}
-			console.log('dataset', dataset)
+			this.addZone(dataset)
+		},
+		async doSignOut() {
+			const result = await this.logout()
+			this.$router.push('/login')
 		},
 		makePolygon() {
 			this.makingPolygon = true
@@ -147,6 +167,9 @@ export default {
 	width: 70%;
 	height: 100%;
 }
+.w50 {
+	width: 50%;
+}
 .with30 {
 	width: 30%;
 	height: 100%;
@@ -154,10 +177,9 @@ export default {
 .logo {
 	width: 60%;
 }
-.m10 {
-	margin: 10px;
+a {
+	color: grey;
 }
-
 select,
 input,
 button {
@@ -167,18 +189,12 @@ button {
 	margin-top: 5px;
 	margin-bottom: 5px;
 }
-
 .separation {
 	border-top: 1px solid #eaeaea;
 	padding-top: 5px;
 	padding-bottom: 10px;
 }
-.text-right {
-	text-align: right;
-}
-.text-center {
-	text-align: center;
-}
+
 .warning {
 	color: red;
 	background: wheat;

@@ -1,5 +1,5 @@
 <template>
-	<div class="register">
+	<div class="h100 bgEsime">
 		<h1 class="title">Sign Up</h1>
 		<form action class="form" @submit.prevent="doRegister">
 			<label class="form-label" for="#email">Email:</label>
@@ -11,6 +11,7 @@
 			<label class="form-label" for="#password-repeat">Repite la contraeña:</label>
 			<input v-model="passwordRepeat" class="form-input" type="password" id="password-repeat" placeholder="Password" />
 			<input class="form-submit" type="submit" value="Sign Up" />
+			<div class="bottomLink"><a href="#" @click="toLogin">Login</a></div>
 		</form>
 	</div>
 </template>
@@ -26,6 +27,9 @@ export default {
 	}),
 	methods: {
 		...mapActions(['register']),
+		toLogin() {
+			this.$router.push('/login')
+		},
 		async doRegister() {
 			const paramas = {
 				'username': this.email,
@@ -44,9 +48,6 @@ export default {
 </script>
 
 <style lang="css" scoped>
-.register {
-	padding: 2rem;
-}
 .title {
 	text-align: center;
 }
