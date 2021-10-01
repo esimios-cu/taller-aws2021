@@ -11,7 +11,7 @@
 			<label class="form-label" for="#password-repeat">Repite la contraeña:</label>
 			<input v-model="passwordRepeat" class="form-input" type="password" id="password-repeat" placeholder="Password" />
 			<input class="form-submit" type="submit" value="Sign Up" />
-			<div><a href="#" @click="toLogin">Login</a></div>
+			<div class="bottomLink"><a href="#" @click="toLogin">Login</a></div>
 		</form>
 	</div>
 </template>

@@ -18,16 +18,16 @@
 							Debe hacer varios clicks sobre el mapa para delimitar la zona a crear. Al terminar el poligono se iluminará, agregue un nombre y seleccione el botón de "Agregar Zona" para almacenarlo.
 						</div>
 						<div v-if="makingPolygon">
-							<form @submit.prevent="addZone">
+							<form @submit.prevent="onAddZone">
 								<input v-model="zoneName" required="true" placeholder="Nombre de la zona" />
 								<button :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
-								<button type="reset" @click="cancelAddZone">cancelar</button>
+								<button type="reset" @click="cancelAddZone">Cancelar</button>
 							</form>
 						</div>
 					</div>
 					<div class="separation">
 						<select :disabled="makingPolygon" class="text-center" v-model="selectedZone" @change="changeSelectZone">
-							<option value="null">Seleccione una zona</option>
+							<option value="">Seleccione una zona</option>
 							<option v-for="zone in zones" :value="zone.name" :key="zone.idZone">
 								{{ zone.name }}
 							</option>
@@ -52,7 +52,7 @@ export default {
 	},
 	data() {
 		return {
-			selectedZone: null,
+			selectedZone: '',
 			zones: [{ name: 'Zona 1', polygon: [] }],
 			center: { lat: 19.32874, lng: -99.112096 },
 			markers: [],
@@ -67,6 +67,7 @@ export default {
 	},
 	components: {},
 	async mounted() {
+		this.loadZones()
 		this.$refs.mapRef.$mapPromise.then(map => {
 			this.map = map
 			window.map = map
@@ -93,7 +94,7 @@ export default {
 		})
 	},
 	methods: {
-		...mapActions(['logout']),
+		...mapActions(['logout', 'getAllZones', 'addZone']),
 		cleanPolygon() {
 			this.pointsOfPolygon = []
 			this.polyline.setPath(this.pointsOfPolygon)
@@ -103,7 +104,15 @@ export default {
 			this.cleanPolygon()
 			this.makingPolygon = false
 		},
-		addZone() {
+		async loadZones() {
+			try {
+				const resultZones = await this.getAllZones()
+				this.zones = resultZones.data
+			} catch (err) {
+				console.error(err)
+			}
+		},
+		onAddZone() {
 			const dataset = {
 				name: this.zoneName,
 				polygon: this.polygon
@@ -113,7 +122,7 @@ export default {
 						return { lat: item.lat(), lng: item.lng() }
 					})
 			}
-			console.log('dataset', dataset)
+			this.addZone(dataset)
 		},
 		async doSignOut() {
 			const result = await this.logout()

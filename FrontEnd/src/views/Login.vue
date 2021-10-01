@@ -9,7 +9,7 @@
 			<p v-if="error" class="error">{{ error }}</p>
 			<input class="form-submit" type="submit" value="Login" />
 
-			<div><a href="#" @click="toRegister">Ir al registro</a></div>
+			<div class="bottomLink"><a href="#" @click="toRegister">Ir al registro</a></div>
 		</form>
 	</div>
 </template>

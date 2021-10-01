@@ -60,6 +60,10 @@ body {
 a {
 	color: white;
 }
+.bottomLink {
+	text-align: right;
+	padding-top: 10px;
+}
 .form {
 	margin: 3rem auto;
 	display: flex;
