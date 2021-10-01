@@ -1,4 +1,5 @@
-const signup = require('./modules/signup')
+const authentication = require('./modules/authentication')
+const utilitiesResponse = require('./lib/utilitiesResponse')
 const version = require('@aws-sdk/client-cognito-identity-provider/package.json').version
 
 module.exports.handler = async (event, context) => {
@@ -14,50 +15,28 @@ module.exports.handler = async (event, context) => {
 			console.log('Request body ->', body)
 			if (!body.username || !body.password || !body.name) {
 				statusCode = 400
-				throw new Error('No se especificarion los datos del usuario')
+				throw new Error('No se especificaron los datos del usuario')
 			}
 		} else {
 			statusCode = 400
-			throw new Error('No especifico el cuerpo de la petición')
+			throw new Error('No se especificó el cuerpo de la petición')
 		}
-		const userCredentials = {
+		const user = {
 			username: body.username,
 			password: body.password,
 			name: body.name
 		}
-		let signUpResponse = await signup.cognitoSignUp(userCredentials)
+		let signUpResponse = await authentication.signUp(user)
 		console.log('signUpResponse ->', signUpResponse)
-		return formatResponse(201, {
-			'UserConfirmed': signUpResponse.UserConfirmed,
-			'CodeDeliveryDetails': signUpResponse.CodeDeliveryDetails,
-			'UserSub': signUpResponse.UserSub
+		return utilitiesResponse.success(201, {
+			userConfirmed: signUpResponse.UserConfirmed,
+			codeDeliveryDetails: signUpResponse.CodeDeliveryDetails,
+			userSub: signUpResponse.UserSub
 		})
 	} catch (_err) {
 		console.log('ERROR on Handler', _err)
-		let err = formatError(statusCode, _err)
+		let err = utilitiesResponse.error(statusCode, _err)
 		console.log('ERROR FORMAT->', err)
 		return err
-	}
-}
-
-const formatResponse = (statusCode, body) => {
-	return {
-		'statusCode': statusCode,
-		'headers': {
-			'Content-Type': 'application/json'
-		},
-		'isBase64Encoded': false,
-		'body': JSON.stringify(body)
-	}
-}
-
-const formatError = (statusCode, error) => {
-	return {
-		'statusCode': statusCode,
-		'headers': {
-			'Content-Type': 'application/json'
-		},
-		'isBase64Encoded': false,
-		'body': JSON.stringify({ message: error.message })
 	}
 }

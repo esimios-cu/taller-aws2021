@@ -4,7 +4,7 @@ resource "aws_lambda_function" "sign_up" {
     s3_bucket           = aws_s3_bucket.lambda_bucket.id
     s3_key              = aws_s3_bucket_object.lambda_code_sign_up.key
     runtime             = "nodejs14.x"
-    handler             = "signin_handler.handler"
+    handler             = "signup_handler.handler"
     source_code_hash    = data.archive_file.lambda_package_sign_up.output_base64sha256
     role                = aws_iam_role.lambda_auth.arn
     layers              = [aws_lambda_layer_version.aws_sdk.arn]
@@ -19,6 +19,30 @@ resource "aws_lambda_function" "sign_up" {
 
 resource "aws_cloudwatch_log_group" "sign_up" {
     name                = "/aws/lambda/${aws_lambda_function.sign_up.function_name}"
+    retention_in_days   = 30
+}
+
+resource "aws_lambda_function" "sign_in" {
+    function_name       = "SignIn"
+    description         = "Función encargada de la atenticación de los usuarios con Cognito"
+    s3_bucket           = aws_s3_bucket.lambda_bucket.id
+    s3_key              = aws_s3_bucket_object.lambda_code_sign_in.key
+    runtime             = "nodejs14.x"
+    handler             = "signin_handler.handler"
+    source_code_hash    = data.archive_file.lambda_package_sign_in.output_base64sha256
+    role                = aws_iam_role.lambda_auth.arn
+    layers              = [aws_lambda_layer_version.aws_sdk.arn]
+    environment {
+      variables = {
+          COGNITO_CLIENT_ID = aws_cognito_user_pool_client.client.id
+      }
+    }
+
+    depends_on = [aws_cognito_user_pool_client.client]
+}
+
+resource "aws_cloudwatch_log_group" "sign_in" {
+    name                = "/aws/lambda/${aws_lambda_function.sign_in.function_name}"
     retention_in_days   = 30
 }
 
