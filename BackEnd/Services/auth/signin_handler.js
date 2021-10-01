@@ -1,5 +1,6 @@
 const authentication = require('./modules/authentication')
 const utilitiesResponse = require('./lib/utilitiesResponse')
+const { NotAuthorizedException } = require('@aws-sdk/client-cognito-identity-provider')
 
 module.exports.handler = async (event, context) => {
 	let statusCode = 500
@@ -25,17 +26,42 @@ module.exports.handler = async (event, context) => {
 		}
 		let signInResponse = await authentication.signIn(userCredentials)
 		console.log('signInResponse ->', signInResponse)
+
+		let getUserResponse = await authentication.getUser({
+			accessToken: signInResponse.AuthenticationResult.AccessToken
+		})
+		console.log('getUserResponse ->', getUserResponse)
+		const userName = getUserResponse.UserAttributes.find(attr => attr.Name === 'name')
+		if (!userName) {
+			statusCode = 500
+			throw new Error('Ocurrio un error al recuperar los datos del usuario')
+		}
+
 		return utilitiesResponse.success(200, {
 			accessToken: signInResponse.AuthenticationResult.AccessToken,
 			expiresIn: signInResponse.AuthenticationResult.ExpiresIn,
 			tokenType: signInResponse.AuthenticationResult.TokenType,
 			refreshToken: signInResponse.AuthenticationResult.RefreshToken,
-			idToken: signInResponse.AuthenticationResult.IdToken
+			idToken: signInResponse.AuthenticationResult.IdToken,
+			name: userName.Value
 		})
 	} catch (_err) {
-		console.log('ERROR on Handler', _err)
-		let err = utilitiesResponse.error(statusCode, _err)
-		console.log('ERROR FORMAT->', err)
-		return err
+		let err = _err
+		console.log('ERROR on Handler', err)
+		if (err.name && err.name == 'NotAuthorizedException') {
+			statusCode = 400
+			err.message = 'El usuario o contraseña son incorrectos'
+		}
+		if (err.name && err.name == 'UserNotFoundException') {
+			statusCode = 400
+			err.message = 'La cuenta especificada no existe'
+		}
+		if (err.name && err.name == 'UserNotConfirmedException') {
+			statusCode = 400
+			err.message = 'No sea ha confirmado el correo electrónico'
+		}
+		let errResponse = utilitiesResponse.error(statusCode, err)
+		console.log('ERROR RESPONSE->', errResponse)
+		return errResponse
 	}
 }

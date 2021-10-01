@@ -76,6 +76,7 @@ data "aws_iam_policy_document" "cognito_auth_permissions" {
         actions = [
             "cognito-idp:SignUp",
             "cognito-idp:InitiateAuth",
+            "cognito-idp:GetUser",
         ]
         effect  = "Allow"
         resources = [

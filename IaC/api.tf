@@ -1,6 +1,11 @@
 resource "aws_apigatewayv2_api" "api_gateway" {
     name = "api-taller-seguridad"
     protocol_type = "HTTP"
+    cors_configuration {
+        allow_headers = ["*"]
+        allow_methods = ["*"]
+        allow_origins = ["*"]
+    }
 }
 
 resource "aws_apigatewayv2_authorizer" "api_authorizer" {

@@ -1,4 +1,4 @@
-const { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand } = require('@aws-sdk/client-cognito-identity-provider')
+const { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand, GetUserCommand } = require('@aws-sdk/client-cognito-identity-provider')
 
 module.exports = {
 	async signUp({ username, password, name }) {
@@ -31,6 +31,16 @@ module.exports = {
 		}
 		console.log('initiateAuthCommandInput', initiateAuthCommandInput)
 		const command = new InitiateAuthCommand(initiateAuthCommandInput)
+		return await client.send(command)
+	},
+
+	async getUser({ accessToken }) {
+		const client = new CognitoIdentityProviderClient()
+		const getUserCommandInput = {
+			AccessToken: accessToken
+		}
+		console.log('getUserCommandInput ->', getUserCommandInput)
+		const command = new GetUserCommand(getUserCommandInput)
 		return await client.send(command)
 	}
 }
