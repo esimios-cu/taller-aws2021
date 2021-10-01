@@ -25,12 +25,24 @@ module.exports.handler = async (event, context) => {
 		}
 		let signInResponse = await authentication.signIn(userCredentials)
 		console.log('signInResponse ->', signInResponse)
+
+		let getUserResponse = await authentication.getUser({
+			accessToken: signInResponse.AuthenticationResult.AccessToken
+		})
+		console.log('getUserResponse ->', getUserResponse)
+		const userName = getUserResponse.UserAttributes.find(attr => attr.Name == 'name')
+		if (!userName) {
+			statusCode = 500
+			throw new Error('Ocurrio un error al recuperar los datos del usuario')
+		}
+
 		return utilitiesResponse.success(200, {
 			accessToken: signInResponse.AuthenticationResult.AccessToken,
 			expiresIn: signInResponse.AuthenticationResult.ExpiresIn,
 			tokenType: signInResponse.AuthenticationResult.TokenType,
 			refreshToken: signInResponse.AuthenticationResult.RefreshToken,
-			idToken: signInResponse.AuthenticationResult.IdToken
+			idToken: signInResponse.AuthenticationResult.IdToken,
+			name: userName.Value
 		})
 	} catch (_err) {
 		console.log('ERROR on Handler', _err)
