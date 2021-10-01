@@ -1,7 +1,7 @@
 <template>
 	<div class="login">
 		<h1 class="title">Iniciar sesión</h1>
-		<form action class="form" @submit.prevent="login">
+		<form action class="form" @submit.prevent="doLogin">
 			<label class="form-label" for="#email">Email:</label>
 			<input class="form-input" v-model="email" type="email" id="email" required placeholder="Email" />
 			<label class="form-label" for="#password">Contraseña:</label>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import { mapActions, mapState } from 'vuex'
+
 export default {
 	data: () => ({
 		email: '',
@@ -20,9 +22,19 @@ export default {
 		error: false
 	}),
 	methods: {
-		login() {
-			console.log(this.email)
-			console.log(this.password)
+		...mapActions(['login']),
+		async doLogin() {
+			const paramas = {
+				'username': this.email,
+				'password': this.password
+			}
+			console.log('params', paramas)
+			try {
+				await this.login(paramas)
+				this.$router.push('/')
+			} catch (error) {
+				console.log(error)
+			}
 		}
 	}
 }

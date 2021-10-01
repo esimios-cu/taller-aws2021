@@ -1,5 +1,5 @@
 <template>
-	<div id="app">
+	<div class="h100" id="app">
 		<router-view />
 	</div>
 </template>
@@ -24,5 +24,18 @@
 
 #nav a.router-link-exact-active {
 	color: #42b983;
+}
+html,
+body {
+	height: 100%; /*both html and body*/
+}
+body {
+	margin: 0; /*reset default margin*/
+}
+.h100 {
+	height: 100%;
+}
+.w100 {
+	height: 100%;
 }
 </style>

@@ -1,9 +1,11 @@
 <template>
 	<div class="register">
 		<h1 class="title">Sign Up</h1>
-		<form action class="form" @submit.prevent="register">
+		<form action class="form" @submit.prevent="doRegister">
 			<label class="form-label" for="#email">Email:</label>
 			<input v-model="email" class="form-input" type="email" id="email" required placeholder="Email" />
+			<label class="form-label" for="#name">Nombre:</label>
+			<input v-model="name" class="form-input" type="text" id="name" required placeholder="Nombre" />
 			<label class="form-label" for="#password">Password:</label>
 			<input v-model="password" class="form-input" type="password" id="password" placeholder="Password" />
 			<label class="form-label" for="#password-repeat">Repite la contraeña:</label>
@@ -14,18 +16,24 @@
 </template>
 
 <script>
-import auth from '@/components/auth'
-
+import { mapActions } from 'vuex'
 export default {
 	data: () => ({
 		email: '',
+		name: '',
 		password: '',
 		passwordRepeat: ''
 	}),
 	methods: {
-		async register() {
+		...mapActions(['register']),
+		async doRegister() {
+			const paramas = {
+				'username': this.email,
+				'password': this.password,
+				'name': this.name
+			}
 			try {
-				await auth.register(this.email, this.password)
+				await this.register(paramas)
 				this.$router.push('/')
 			} catch (error) {
 				console.log(error)
