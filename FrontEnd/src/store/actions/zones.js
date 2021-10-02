@@ -9,9 +9,9 @@ export default {
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
 		}
 	},
-	async getAllZones(store, context) {
+	async getZones(store, context) {
 		try {
-			const result = await post('getAllZones')
+			const result = await post('getZones')
 			return result
 		} catch (err) {
 			const response = err.response.data

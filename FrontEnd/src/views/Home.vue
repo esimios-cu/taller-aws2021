@@ -94,7 +94,7 @@ export default {
 		})
 	},
 	methods: {
-		...mapActions(['logout', 'getAllZones', 'addZone']),
+		...mapActions(['logout', 'getZones', 'addZone']),
 		cleanPolygon() {
 			this.pointsOfPolygon = []
 			this.polyline.setPath(this.pointsOfPolygon)
@@ -106,7 +106,7 @@ export default {
 		},
 		async loadZones() {
 			try {
-				const resultZones = await this.getAllZones()
+				const resultZones = await this.getZones()
 				this.zones = resultZones.data
 			} catch (err) {
 				console.error(err)
