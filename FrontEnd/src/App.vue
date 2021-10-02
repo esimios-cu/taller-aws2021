@@ -17,6 +17,10 @@ body {
 .p10 {
 	margin: 10px;
 }
+.error {
+	margin: 1rem 0 0;
+	color: #ff4a96;
+}
 .bgRed {
 	background-color: red;
 }

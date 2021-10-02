@@ -11,7 +11,6 @@
 					<div class="text-right">Bienvenido {{ userData.name }}<br /><a href="#" @click="doSignOut()">Cerrar sesión</a></div>
 					<img class="logo" src="@/assets/logoEsime.png" />
 					<h3>Taller "Prácticas de seguridad en el desarrollo de microservicios en AWS"</h3>
-
 					<div class="separation">
 						<button v-if="!makingPolygon" @click="makePolygon">Hacer nueva zona</button>
 						<div class="warning" v-if="pointsOfPolygon.length == 0 && makingPolygon && polygon && polygon.getPaths().length === 0">
@@ -23,6 +22,8 @@
 								<button :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
 								<button type="reset" @click="cancelAddZone">Cancelar</button>
 							</form>
+							<pulse-loader v-if="loaders.addingZone"></pulse-loader>
+							<div class="error" v-if="errors.addZone">{{ errors.addZone }}</div>
 						</div>
 					</div>
 					<div class="separation">
@@ -32,6 +33,8 @@
 								{{ zone.name }}
 							</option>
 						</select>
+						<pulse-loader v-if="loaders.loadingZones"></pulse-loader>
+						<div class="error" v-if="errors.loadZones">{{ errors.loadZones }}</div>
 					</div>
 				</div>
 			</div>
@@ -42,10 +45,10 @@
 <script>
 import { gmapApi } from 'vue2-google-maps'
 import { mapActions, mapState } from 'vuex'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
 export default {
 	name: 'Home',
-	// components([GmapMap,GmapMarker]),
 	computed: {
 		...mapState({ userData: state => state.userData }),
 		google: gmapApi
@@ -62,10 +65,20 @@ export default {
 			polyline: null,
 			polygon: null,
 			makingPolygon: false,
-			zoneName: ''
+			zoneName: '',
+			loaders: {
+				addingZone: false,
+				loadingZones: false
+			},
+			errors: {
+				addZone: '',
+				loadZones: ''
+			}
 		}
 	},
-	components: {},
+	components: {
+		PulseLoader
+	},
 	async mounted() {
 		this.loadZones()
 		this.$refs.mapRef.$mapPromise.then(map => {
@@ -94,7 +107,7 @@ export default {
 		})
 	},
 	methods: {
-		...mapActions(['logout', 'getAllZones', 'addZone']),
+		...mapActions(['logout', 'getZones', 'addZone']),
 		cleanPolygon() {
 			this.pointsOfPolygon = []
 			this.polyline.setPath(this.pointsOfPolygon)
@@ -103,16 +116,23 @@ export default {
 		cancelAddZone() {
 			this.cleanPolygon()
 			this.makingPolygon = false
+			this.errors.addZone = ''
+			this.zoneName = ''
 		},
 		async loadZones() {
+			this.loadZones = true
+			this.errors.loadZones = ''
 			try {
-				const resultZones = await this.getAllZones()
-				this.zones = resultZones.data
+				const resultZones = await this.getZones()
+				this.loadZones = false
+				this.zones = resultZones && resultZones.data ? resultZones.data : []
 			} catch (err) {
+				this.loadZones = false
+				this.errors.loadZones = err.message || 'Error al agregar la zona'
 				console.error(err)
 			}
 		},
-		onAddZone() {
+		async onAddZone() {
 			const dataset = {
 				name: this.zoneName,
 				polygon: this.polygon
@@ -122,7 +142,16 @@ export default {
 						return { lat: item.lat(), lng: item.lng() }
 					})
 			}
-			this.addZone(dataset)
+			this.errors.addZone = ''
+			this.addingZone = true
+			try {
+				const result = await this.addZone(dataset)
+				this.addingZone = false
+				this.zoneName = ''
+			} catch (err) {
+				this.errors.addZone = err.message || 'Error al agregar la zona'
+				this.addingZone = false
+			}
 		},
 		async doSignOut() {
 			const result = await this.logout()
@@ -144,7 +173,6 @@ export default {
 			} else if (this.pointsOfPolygon.length > 1) {
 				const lastPoint = this.pointsOfPolygon[0]
 				const distance = Math.sqrt(Math.pow(lastPoint.lat - latLng.lat, 2) + Math.pow(lastPoint.lng - latLng.lng, 2))
-				console.log('distance', distance)
 				const distanceMinForClose = Math.exp(-(0.5 * (this.map.getZoom() - 1)))
 				if (distance <= distanceMinForClose) {
 					this.polygon.setPaths(this.pointsOfPolygon)

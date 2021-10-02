@@ -5,17 +5,17 @@ export default {
 			const result = await post('addZone', context)
 			return result
 		} catch (err) {
-			const response = err.response.data
+			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
 		}
 	},
-	async getAllZones(store, context) {
+	async getZones(store, context) {
 		try {
-			const result = await post('getAllZones')
+			const result = await post('getZones')
 			return result
 		} catch (err) {
-			const response = err.response.data
-			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
+			const response = err && err.response && err.response.data ? err.response.data : {}
+			throw { code: -1, message: response.message || 'Ocurrió un error al obtener las zonas' }
 		}
 	}
 }

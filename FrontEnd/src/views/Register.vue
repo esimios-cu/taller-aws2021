@@ -10,6 +10,7 @@
 			<input v-model="password" class="form-input" type="password" id="password" placeholder="Password" />
 			<label class="form-label" for="#password-repeat">Repite la contraeña:</label>
 			<input v-model="passwordRepeat" class="form-input" type="password" id="password-repeat" placeholder="Password" />
+			<p v-if="error" class="error">{{ error }}</p>
 			<input class="form-submit" type="submit" value="Sign Up" />
 			<div class="bottomLink"><a href="#" @click="toLogin">Login</a></div>
 		</form>
@@ -23,7 +24,8 @@ export default {
 		email: '',
 		name: '',
 		password: '',
-		passwordRepeat: ''
+		passwordRepeat: '',
+		error: ''
 	}),
 	methods: {
 		...mapActions(['register']),
@@ -38,9 +40,11 @@ export default {
 			}
 			try {
 				await this.register(paramas)
-				this.$router.push('/')
+				console.log('result', result)
+				this.$router.push('/login')
 			} catch (error) {
-				console.log(error)
+				this.error = error.message
+				console.error('error', error)
 			}
 		}
 	}
