@@ -12,30 +12,39 @@
 		</form>
 		<form v-if="status === 'USER_LOGIN'" action class="form pullUp" @submit.prevent="doLogin">
 			<label class="form-label" for="#email">Email:</label>
-			<input class="form-input" v-model="email" type="email" id="email" required placeholder="Email" />
+			<input :disabled="loaders.doingLogin" class="form-input" v-model="email" type="email" id="email" required placeholder="Email" />
 			<label class="form-label" for="#password">Contraseña:</label>
-			<input class="form-input" v-model="password" type="password" id="password" placeholder="Password" />
+			<input :disabled="loaders.doingLogin" class="form-input" v-model="password" type="password" id="password" placeholder="Password" />
 			<label class="form-label" for="#verificationCode">Codigo de verificación:</label>
-			<input class="form-input" v-model="verificationCode" type="number" id="verificationCode" placeholder="Código de verificación de email" />
+			<input :disabled="loaders.doingLogin" class="form-input" v-model="verificationCode" type="number" id="verificationCode" placeholder="Código de verificación de email" />
 			<sub>Agregar el código de verificación para validar su email</sub>
 			<p v-if="error" class="error">{{ error }}</p>
-			<input class="form-submit" type="submit" value="Login" />
-			<div class="bottomLink"><a href="#" @click="toRegister">Ir al registro</a></div>
+			<pulse-loader class="m10" v-if="loaders.doingLogin"></pulse-loader>
+			<input v-show="!loaders.doingLogin" class="form-submit" type="submit" value="Login" />
+			<div v-show="!loaders.doingLogin" class="bottomLink"><a href="#" @click="toRegister">Ir al registro</a></div>
 		</form>
 	</div>
 </template>
 
 <script>
 import { mapActions, mapState, mapMutations } from 'vuex'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
 export default {
+	name: 'Login',
+	components: {
+		PulseLoader
+	},
 	data: () => ({
 		email: '',
 		password: '',
 		verificationCode: '',
 		error: '',
 		status: 'USER_LOGIN', // USER_LOGIN o API_CONFIG,
-		currentApiUrl: ''
+		currentApiUrl: '',
+		loaders: {
+			doingLogin: false
+		}
 	}),
 	computed: {
 		...mapState({ apiUrl: state => state.apiUrl })
@@ -69,6 +78,7 @@ export default {
 				params.verificationCode = this.verificationCode
 			}
 			console.log('params', params)
+			this.loaders.doingLogin = true
 			try {
 				const result = await this.login(params)
 				console.log('result', result)
@@ -76,6 +86,8 @@ export default {
 			} catch (error) {
 				this.error = error.message
 				console.error('error', error)
+			} finally {
+				this.loaders.doingLogin = false
 			}
 		}
 	}

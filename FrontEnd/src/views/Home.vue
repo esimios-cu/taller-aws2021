@@ -19,19 +19,23 @@
 						<div v-if="makingPolygon">
 							<form @submit.prevent="onAddZone">
 								<input v-model="zoneName" required="true" placeholder="Nombre de la zona" />
-								<button :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
-								<button type="reset" @click="cancelAddZone">Cancelar</button>
+								<select required class="text-center" v-model="typeZone">
+									<option value="">Tipo de zona</option>
+									<option value="private">Privada</option>
+									<option value="private">Pública</option>
+								</select>
+								<pulse-loader class="m10" v-if="loaders.addingZone"></pulse-loader>
+								<button v-show="!loaders.addingZone" :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
+								<button v-show="!loaders.addingZone" type="reset" @click="cancelAddZone">Cancelar</button>
 							</form>
-							<pulse-loader v-if="loaders.addingZone"></pulse-loader>
+
 							<div class="error" v-if="errors.addZone">{{ errors.addZone }}</div>
 						</div>
 					</div>
 					<div class="separation">
 						<select :disabled="makingPolygon" class="text-center" v-model="selectedZone" @change="changeSelectZone">
 							<option value="">Seleccione una zona</option>
-							<option v-for="zone in zones" :value="zone.name" :key="zone.idZone">
-								{{ zone.name }}
-							</option>
+							<option v-for="zone in zones" :value="zone" :key="zone.idZone">{{ zone.name }} ({{ zone.typePolygon }})</option>
 						</select>
 						<pulse-loader v-if="loaders.loadingZones"></pulse-loader>
 						<div class="error" v-if="errors.loadZones">{{ errors.loadZones }}</div>
@@ -55,8 +59,22 @@ export default {
 	},
 	data() {
 		return {
+			typeZone: '',
 			selectedZone: '',
-			zones: [{ name: 'Zona 1', polygon: [] }],
+			zones: [
+				{
+					'name': 'Esime',
+					'typePolygon': 'private',
+					'polygon': [
+						{ 'lat': 19.331422865974794, 'lng': -99.11288456945037 },
+						{ 'lat': 19.329651166970827, 'lng': -99.11394672422027 },
+						{ 'lat': 19.328659007134387, 'lng': -99.11079244641876 },
+						{ 'lat': 19.329641042921292, 'lng': -99.10968737630462 },
+						{ 'lat': 19.331271006813214, 'lng': -99.10988049535369 },
+						{ 'lat': 19.331878442612364, 'lng': -99.11110358266448 }
+					]
+				}
+			],
 			center: { lat: 19.32874, lng: -99.112096 },
 			markers: [],
 			map: null,
@@ -102,6 +120,7 @@ export default {
 				fillColor: '#FF0000',
 				fillOpacity: 0.35
 			})
+			window.polygon = this.polygon
 			this.polyline.setMap(this.map)
 			this.polygon.setMap(this.map)
 		})
@@ -118,6 +137,7 @@ export default {
 			this.makingPolygon = false
 			this.errors.addZone = ''
 			this.zoneName = ''
+			this.typeZone = ''
 		},
 		async loadZones() {
 			this.loadZones = true
@@ -135,6 +155,7 @@ export default {
 		async onAddZone() {
 			const dataset = {
 				name: this.zoneName,
+				typePolygon: this.typeZone,
 				polygon: this.polygon
 					.getPath()
 					.getArray()
@@ -146,10 +167,11 @@ export default {
 			this.addingZone = true
 			try {
 				const result = await this.addZone(dataset)
-				this.addingZone = false
 				this.zoneName = ''
+				this.typeZone = ''
 			} catch (err) {
 				this.errors.addZone = err.message || 'Error al agregar la zona'
+			} finally {
 				this.addingZone = false
 			}
 		},
@@ -159,9 +181,20 @@ export default {
 		},
 		makePolygon() {
 			this.makingPolygon = true
+			this.cleanPolygon()
 		},
 		changeSelectZone() {
 			console.log('selectedZone', this.selectedZone)
+			this.cleanPolygon()
+			if (this.selectedZone) {
+				bounds = new google.maps.LatLngBounds()
+				this.selectedZone.polygon.forEach(function (element, index) {
+					bounds.extend(element)
+				})
+				this.map.setCenter(bounds.getCenter())
+
+				this.polygon.setPath(this.selectedZone.polygon)
+			}
 		},
 		clickOnMap(event) {
 			if (!this.makingPolygon) {

@@ -3,15 +3,16 @@
 		<h1 class="title">Sign Up</h1>
 		<form action class="form" @submit.prevent="doRegister">
 			<label class="form-label" for="#email">Email:</label>
-			<input v-model="email" class="form-input" type="email" id="email" required placeholder="Email" />
+			<input :disabled="loaders.doingRegister" v-model="email" class="form-input" type="email" id="email" required placeholder="Email" />
 			<label class="form-label" for="#name">Nombre:</label>
-			<input v-model="name" class="form-input" type="text" id="name" required placeholder="Nombre" />
-			<label class="form-label" for="#password">Password:</label>
-			<input v-model="password" class="form-input" type="password" id="password" placeholder="Password" />
+			<input :disabled="loaders.doingRegister" v-model="name" class="form-input" type="text" id="name" required placeholder="Nombre" />
+			<label class="form-label" for="#password">Contraseña:</label>
+			<input :disabled="loaders.doingRegister" v-model="password" class="form-input" type="password" id="password" placeholder="Password" />
 			<label class="form-label" for="#password-repeat">Repite la contraeña:</label>
-			<input v-model="passwordRepeat" class="form-input" type="password" id="password-repeat" placeholder="Password" />
+			<input :disabled="loaders.doingRegister" v-model="passwordRepeat" class="form-input" type="password" id="password-repeat" placeholder="Password" />
 			<p v-if="error" class="error">{{ error }}</p>
-			<input class="form-submit" type="submit" value="Sign Up" />
+			<pulse-loader class="m10" v-if="loaders.doingRegister"></pulse-loader>
+			<input v-show="!loaders.doingRegister" class="form-submit" type="submit" value="Sign Up" />
 			<div class="bottomLink"><a href="#" @click="toLogin">Login</a></div>
 		</form>
 	</div>
@@ -19,13 +20,22 @@
 
 <script>
 import { mapActions } from 'vuex'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+
 export default {
+	name: 'Register',
+	components: {
+		PulseLoader
+	},
 	data: () => ({
 		email: '',
 		name: '',
 		password: '',
 		passwordRepeat: '',
-		error: ''
+		error: '',
+		loaders: {
+			doingRegister: false
+		}
 	}),
 	methods: {
 		...mapActions(['register']),
@@ -33,18 +43,26 @@ export default {
 			this.$router.push('/login')
 		},
 		async doRegister() {
+			if (this.password != this.passwordRepeat) {
+				this.error = 'Las contraseñas no coinciden'
+				throw 'Las contraseñas no coinciden'
+			}
+			this.error = ''
+			this.loaders.doingRegister = true
 			const paramas = {
 				'username': this.email,
 				'password': this.password,
 				'name': this.name
 			}
 			try {
-				await this.register(paramas)
+				const result = await this.register(paramas)
 				console.log('result', result)
 				this.$router.push('/login')
 			} catch (error) {
 				this.error = error.message
 				console.error('error', error)
+			} finally {
+				this.loaders.doingRegister = false
 			}
 		}
 	}
