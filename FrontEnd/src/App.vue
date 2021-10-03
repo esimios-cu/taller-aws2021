@@ -59,7 +59,10 @@ body {
 	height: 100%;
 }
 .w100 {
-	height: 100%;
+	width: 100%;
+}
+.w90 {
+	width: 90% !important;
 }
 a {
 	color: white;
@@ -69,6 +72,7 @@ a {
 	padding-top: 10px;
 }
 .form {
+	opacity: 1;
 	margin: 3rem auto;
 	display: flex;
 	flex-direction: column;
