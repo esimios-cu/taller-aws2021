@@ -4,7 +4,7 @@ resource "aws_apigatewayv2_api" "api_gateway" {
     cors_configuration {
         allow_headers = ["*"]
         allow_methods = ["*"]
-        allow_origins = ["*"]
+        allow_origins = ["*"] //esimeculhuacan.com
     }
 }
 
@@ -39,6 +39,36 @@ resource "aws_apigatewayv2_integration" "sign_in" {
     integration_method  = "POST"
     integration_type    = "AWS_PROXY"
     integration_uri     = aws_lambda_function.sign_in.invoke_arn
+}
+
+//ReadPolygons
+resource "aws_apigatewayv2_integration" "readPolygons" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    integration_method  = "POST"
+    integration_type    = "AWS_PROXY"
+    integration_uri     = aws_lambda_function.readPolygons.invoke_arn
+}
+resource "aws_apigatewayv2_route" "readPolygons" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    authorizer_id       = aws_apigatewayv2_authorizer.api_authorizer.id
+    authorization_type  = "JWT"
+    route_key           = "POST /readPolygons"
+    target              = "integrations/${aws_apigatewayv2_integration.readPolygons.id}"
+}
+
+//CreatePolygon
+resource "aws_apigatewayv2_integration" "createPolygon" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    integration_method  = "POST"
+    integration_type    = "AWS_PROXY"
+    integration_uri     = aws_lambda_function.createPolygon.invoke_arn
+}
+resource "aws_apigatewayv2_route" "createPolygon" {
+    api_id              = aws_apigatewayv2_api.api_gateway.id
+    authorizer_id       = aws_apigatewayv2_authorizer.api_authorizer.id
+    authorization_type  = "JWT"
+    route_key           = "POST /createPolygon"
+    target              = "integrations/${aws_apigatewayv2_integration.createPolygon.id}"
 }
 
 resource "aws_apigatewayv2_route" "sign_in" {
@@ -84,6 +114,23 @@ resource "aws_lambda_permission" "sign_in" {
     statement_id    = "AllowExecutionFromAPIGateway"
     action          = "lambda:InvokeFunction"
     function_name   = aws_lambda_function.sign_in.function_name
+    principal       = "apigateway.amazonaws.com"
+
+    source_arn      = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "readPolygons" {
+    statement_id    = "AllowExecutionFromAPIGateway"
+    action          = "lambda:InvokeFunction"
+    function_name   = aws_lambda_function.readPolygons.function_name
+    principal       = "apigateway.amazonaws.com"
+
+    source_arn      = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"
+}
+resource "aws_lambda_permission" "createPolygon" {
+    statement_id    = "AllowExecutionFromAPIGateway"
+    action          = "lambda:InvokeFunction"
+    function_name   = aws_lambda_function.createPolygon.function_name
     principal       = "apigateway.amazonaws.com"
 
     source_arn      = "${aws_apigatewayv2_api.api_gateway.execution_arn}/*/*"

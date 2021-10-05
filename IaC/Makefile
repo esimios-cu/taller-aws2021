@@ -10,6 +10,6 @@ terraform:
 	-w /home/terraform/project \
 	--mount type=bind,source=${HOME}/.aws,destination=/home/terraform/.aws,readonly \
 	--mount type=bind,source=${PWD},destination=/home/terraform/project \
-	--mount type=bind,source=${PWD}/../BackEnd/services,destination=/home/terraform/BackEnd/services/ \
+	--mount type=bind,source=${PWD}/../BackEnd/Services,destination=/home/terraform/BackEnd/Services/ \
 	--name terraform \
 	hashicorp/terraform ${CMD} -var "aws_profile=${AWS_PROFILE}" ${OTHER_VARS}

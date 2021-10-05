@@ -12,3 +12,15 @@ variable "aws_env" {
     type    = string
     default = "Development"
 }
+
+variable "aws_bucket_prefix" {
+    description = "Etiqueta prefijo para bucket"
+    type    = string
+    default = "ivan"
+}
+
+variable "google_secret" {
+    description = "Apikey reserveGeocoding"
+    type    = string
+    default = "apikeys/production/googleKey"
+}
