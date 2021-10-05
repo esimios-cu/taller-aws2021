@@ -142,6 +142,7 @@ export default {
 		async loadZones() {
 			this.loadZones = true
 			this.errors.loadZones = ''
+			this.loaders.loadingZones = true
 			try {
 				const resultZones = await this.getZones()
 				this.loadZones = false
@@ -155,6 +156,8 @@ export default {
 				this.loadZones = false
 				this.errors.loadZones = err.message || 'Error al agregar la zona'
 				console.error(err)
+			} finally {
+				this.loaders.loadingZones = false
 			}
 		},
 		async onAddZone() {
@@ -169,15 +172,19 @@ export default {
 					})
 			}
 			this.errors.addZone = ''
-			this.addingZone = true
+			this.loaders.addingZone = true
 			try {
 				const result = await this.addZone(dataset)
+				this.zones.push(dataset)
 				this.zoneName = ''
 				this.typeZone = ''
+				this.makingPolygon = false
+				this.errors.addZone = ''
+				this.cleanPolygon()
 			} catch (err) {
 				this.errors.addZone = err.message || 'Error al agregar la zona'
 			} finally {
-				this.addingZone = false
+				this.loaders.addingZone = false
 			}
 		},
 		async doSignOut() {
