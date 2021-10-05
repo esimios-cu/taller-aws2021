@@ -22,7 +22,7 @@
 								<select required class="text-center" v-model="typeZone">
 									<option value="">Tipo de zona</option>
 									<option value="private">Privada</option>
-									<option value="private">Pública</option>
+									<option value="public">Pública</option>
 								</select>
 								<pulse-loader class="m10" v-if="loaders.addingZone"></pulse-loader>
 								<button v-show="!loaders.addingZone" :disabled="polygon.getPaths().length === 0" type="submit">Agregar zona</button>
@@ -145,7 +145,12 @@ export default {
 			try {
 				const resultZones = await this.getZones()
 				this.loadZones = false
-				this.zones = resultZones && resultZones.data ? resultZones.data : []
+				const result = resultZones && resultZones.data ? resultZones.data : []
+				const zones = (result.globalPolygons || []).concat(result.userPolygons || []).map(item => {
+					item.typePolygon = item.userId === 'globals' ? 'Público' : 'Personal'
+					return item
+				})
+				this.zones = zones
 			} catch (err) {
 				this.loadZones = false
 				this.errors.loadZones = err.message || 'Error al agregar la zona'
@@ -187,7 +192,7 @@ export default {
 			console.log('selectedZone', this.selectedZone)
 			this.cleanPolygon()
 			if (this.selectedZone) {
-				bounds = new google.maps.LatLngBounds()
+				const bounds = new google.maps.LatLngBounds()
 				this.selectedZone.polygon.forEach(function (element, index) {
 					bounds.extend(element)
 				})
