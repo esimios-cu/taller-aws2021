@@ -8,7 +8,7 @@ export default {
 			store.commit('setUserData', result.data)
 			return result
 		} catch (err) {
-			const response = err.response.data
+			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
 		}
 	},
@@ -17,7 +17,7 @@ export default {
 			const result = await post('signup', context)
 			return result
 		} catch (err) {
-			const response = err.response.data
+			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al registrar al usuario' }
 		}
 	},
@@ -27,7 +27,7 @@ export default {
 			store.commit('setUserData', null)
 			return result
 		} catch (err) {
-			const response = err.response.data
+			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer logout' }
 		}
 	}
