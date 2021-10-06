@@ -22,5 +22,5 @@ variable "aws_bucket_prefix" {
 variable "google_secret" {
     description = "Apikey reserveGeocoding"
     type    = string
-    default = "apikeys/production/googleKey"
+    default = "apiKeys/production/googleKey"
 }
