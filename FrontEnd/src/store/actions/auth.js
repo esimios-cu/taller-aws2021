@@ -4,6 +4,7 @@ export default {
 		try {
 			const result = await post('signin', context)
 			setAuthorization(result.accessToken)
+			console.log('result', result)
 			store.commit('setUserData', result.data)
 			return result
 		} catch (err) {
