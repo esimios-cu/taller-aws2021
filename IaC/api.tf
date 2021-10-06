@@ -3,8 +3,11 @@ resource "aws_apigatewayv2_api" "api_gateway" {
     protocol_type = "HTTP"
     cors_configuration {
         allow_headers = ["*"]
-        allow_methods = ["*"]
-        allow_origins = ["*"] //esimeculhuacan.com
+        allow_methods = [
+            "POST",
+            "OPTIONS"
+        ]
+        allow_origins = ["https://esimeculhuacan.com"]
     }
 }
 
