@@ -3,10 +3,9 @@ export default {
 	async login(store, context) {
 		try {
 			const result = await post('signin', context)
-			setAuthorization(result.accessToken)
-			console.log('result', result)
+			setAuthorization(result.data.accessToken)
 			store.commit('setUserData', result.data)
-			return result
+			return result.data || {}
 		} catch (err) {
 			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer login' }
@@ -15,7 +14,7 @@ export default {
 	async register(store, context) {
 		try {
 			const result = await post('signup', context)
-			return result
+			return result.data || {}
 		} catch (err) {
 			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al registrar al usuario' }
@@ -23,9 +22,9 @@ export default {
 	},
 	async logout(store, context) {
 		try {
-			const result = null // await post('signout', context)
+			const result = {} // await post('signout', context)
 			store.commit('setUserData', null)
-			return result
+			return result.data || {}
 		} catch (err) {
 			const response = err && err.response && err.response.data ? err.response.data : {}
 			throw { code: -1, message: response.message || 'Ocurrió un error al hacer logout' }

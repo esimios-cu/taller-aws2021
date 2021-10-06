@@ -1,5 +1,5 @@
 import axios from 'axios'
-const ENDPOINT_PATH = localStorage.getItem('apiUrl') || 'https://pbn46rl9cb.execute-api.us-east-1.amazonaws.com/dev_stage_taller_seguridad/'
+const ENDPOINT_PATH = localStorage.getItem('apiUrl') || 'https://w4m5li0jwh.execute-api.us-east-1.amazonaws.com/dev_stage_taller_seguridad/'
 
 const getApiUrl = () => {
 	return ENDPOINT_PATH
