@@ -2,6 +2,9 @@ const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client
 
 class SecretsManager {
 	constructor(region = 'us-east-1') {
+		if (process.env.REGION) {
+			region = process.env.REGION
+		}
 		this.client = new SecretsManagerClient({ region })
 	}
 	async getSecret(secretName) {

@@ -3,6 +3,9 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
 
 class Dynamo {
 	constructor(region = 'us-east-1') {
+		if (process.env.REGION) {
+			region = process.env.REGION
+		}
 		this.ddbClient = new DynamoDBClient({ region })
 		const marshallOptions = {
 			convertEmptyValues: false, //automatically convert empty strings, blobs, and sets to `null`. false, by default.

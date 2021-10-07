@@ -116,8 +116,12 @@ resource "aws_lambda_function" "readPolygons" {
     vpc_config {
     subnet_ids         = [aws_subnet.lambdas-subnets.id]
     security_group_ids = [aws_security_group.only-vpc-communication-dynamo.id]
-  }
-
+    }
+    environment {
+      variables = {
+          REGION = var.aws_region
+      }
+    }
 }
 
 resource "aws_iam_role" "lambda_readPolygons_rol" {
@@ -202,6 +206,7 @@ resource "aws_lambda_function" "createPolygon" {
     environment {
       variables = {
           GOOGLE_SECRET = var.google_secret
+          REGION = var.aws_region
       }
     }
 }
