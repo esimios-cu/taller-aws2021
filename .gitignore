@@ -3,6 +3,7 @@ node_modules
 .eslintcache
 .DS_Store
 dist/
+config.json
 
 # Created by https://www.toptal.com/developers/gitignore/api/terraform
 # Edit at https://www.toptal.com/developers/gitignore?templates=terraform
