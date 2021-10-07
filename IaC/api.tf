@@ -7,7 +7,7 @@ resource "aws_apigatewayv2_api" "api_gateway" {
             "POST",
             "OPTIONS"
         ]
-        allow_origins = ["https://esimeculhuacan.com"]
+        allow_origins = ["*"] //https://taller-aws-2021.esimeculhuacan.com"]
     }
 }
 

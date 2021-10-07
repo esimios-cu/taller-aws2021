@@ -1,5 +1,4 @@
 class Utils {
-	//constructor() {}
 	static getUserIdFromToken(b64Token) {
 		try {
 			console.log('getUserIdFromToken')

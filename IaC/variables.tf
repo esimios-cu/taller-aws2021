@@ -16,11 +16,15 @@ variable "aws_env" {
 variable "aws_bucket_prefix" {
     description = "Etiqueta prefijo para bucket"
     type    = string
-    default = "ivan"
 }
 
 variable "google_secret" {
     description = "Apikey reserveGeocoding"
     type    = string
     default = "apiKeys/production/googleKey"
+}
+
+variable "google_apikey" {
+    description = "Apikey reserveGeocoding"
+    type    = string
 }
